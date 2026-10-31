@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataIntel AI • Enterprise Autonomous Data Analyst</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    
+    <!-- Top Global Navbar -->
+    <header class="app-navbar">
+      <div class="nav-brand">
+        <div class="brand-badge">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M18 17V9"/>
+            <path d="M13 17V5"/>
+            <path d="M8 17v-3"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">DataIntel <span class="brand-tag">AGENT</span></span>
+          <span class="brand-sub">Autonomous Relational Intelligence</span>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Bar -->
+      <div class="nav-kpis" id="navKpis">
+        <div class="kpi-chip"><span class="kpi-v" id="kpiTables">0</span><span class="kpi-l">Tables</span></div>
+        <div class="kpi-chip"><span class="kpi-v" id="kpiRows">0</span><span class="kpi-l">Records</span></div>
+        <div class="kpi-chip"><span class="kpi-v" id="kpiHealth">--</span><span class="kpi-l">Health</span></div>
+        <div class="kpi-chip"><span class="kpi-v" id="kpiJoins">0</span><span class="kpi-l">Joins</span></div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="nav-actions">
+        <div class="status-pill" id="ollamaStatus">
+          <span class="status-dot"></span>
+          <span id="ollamaStatusText">Ollama: Connecting...</span>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btnToggleDrawer" title="Toggle Under the Hood Model Radar">
+          <span>🧠 Radar</span>
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnClearChat" disabled title="Clear conversation while keeping dataset loaded">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Clear Chat
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnResetSession" disabled title="Reset entire workspace">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Reset All
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnExportPdf" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="workspace">
+      
+      <!-- Left Drawer: Data & Relational Schema -->
+      <aside class="sidebar">
+        
+        <!-- File Ingestion Card -->
+        <div class="side-card">
+          <div class="side-card-title">
+            <span>📁 INGEST DATASETS</span>
+          </div>
+          
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="fileInput" multiple accept=".csv,.xlsx" hidden>
+            <div class="dropzone-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <p class="dropzone-title">Drag & drop CSV / Excel files</p>
+            <p class="dropzone-sub">Upload 1 or multiple related tables</p>
+            <button class="btn btn-sm btn-primary" id="btnBrowse">Browse Files</button>
+          </div>
+        </div>
+
+        <!-- Ingested Tables Card List -->
+        <div class="side-card" id="tablesContainer" style="display: none;">
+          <div class="side-card-title">
+            <span>🗄️ INGESTED TABLES</span>
+            <span class="badge" id="tableCountBadge">0</span>
+          </div>
+          <div class="table-list" id="tableList"></div>
+        </div>
+
+        <!-- Relational Schema Mappings -->
+        <div class="side-card" id="schemaContainer" style="display: none;">
+          <div class="side-card-title">
+            <span>🔗 DISCOVERED RELATIONSHIPS</span>
+          </div>
+          <div class="relationship-list" id="relationshipList"></div>
+        </div>
+
+      </aside>
+
+      <!-- Main Canvas: Proactive Briefing, Suggestions & Chat -->
+      <main class="main-canvas">
+        
+        <!-- Welcome Hero (Shown when no data is loaded) -->
+        <div class="welcome-hero" id="welcomeHero">
+          <div class="hero-sparkle">✨</div>
+          <h2 class="hero-h2">Autonomous Data Analyst Agent</h2>
+          <p class="hero-desc">
+            Powered by local <b>Qwen 2.5-Coder:3B</b> & in-memory <b>DuckDB</b>. Upload any single or multi-table dataset to immediately uncover patterns, run cross-table SQL joins, and generate boardroom intelligence reports.
+          </p>
+          <div class="hero-features">
+            <div class="hero-feat-card">
+              <span class="feat-icon">🔍</span>
+              <h4>Automated Profiling</h4>
+              <p>Detects missing values, anomalies, types, and primary/foreign key linkages.</p>
+            </div>
+            <div class="hero-feat-card">
+              <span class="feat-icon">⚡</span>
+              <h4>DuckDB SQL Joins</h4>
+              <p>Executes multi-table joins and aggregations on hundreds of thousands of rows.</p>
+            </div>
+            <div class="hero-feat-card">
+              <span class="feat-icon">📈</span>
+              <h4>Visual Storytelling</h4>
+              <p>Generates high-resolution statistical charts and business takeaways.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analysis Content Container (Shown when data is loaded) -->
+        <div class="analysis-container" id="analysisContainer" style="display: none;">
+          
+          <!-- Executive Briefing Card -->
+          <div class="briefing-card" id="briefingCard">
+            <div class="briefing-top">
+              <div class="briefing-header">
+                <span class="briefing-badge">💡 PROACTIVE EXECUTIVE BRIEFING</span>
+                <h3 class="briefing-headline" id="briefingHeadline">Analyzing onboarded schema...</h3>
+              </div>
+            </div>
+            <div class="briefing-note" id="briefingNote"></div>
+            <div class="findings-grid" id="findingsGrid"></div>
+          </div>
+
+          <!-- Suggested Investigation Chips -->
+          <div class="suggestions-section" id="suggestionsSection">
+            <div class="section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              <span>Suggested Explorations (Click to investigate):</span>
+            </div>
+            <div class="suggestion-grid" id="suggestionGrid"></div>
+          </div>
+
+          <!-- Chat Conversation History -->
+          <div class="chat-thread" id="chatThread"></div>
+
+        </div>
+
+        <!-- Floating Chat Input Bar -->
+        <div class="chat-bar-container">
+          <form class="chat-form" id="chatForm">
+            <div class="chat-input-wrapper">
+              <input 
+                type="text" 
+                id="queryInput" 
+                class="chat-input" 
+                placeholder="Ask any question across tables (e.g., 'Analyze sales trend by customer segment', 'Plot return rate by category')..."
+                autocomplete="off"
+              >
+              <button type="submit" class="btn btn-primary btn-send" id="btnSend">
+                <span id="btnSendText">Send</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+          <div class="chat-footer-note">
+            <span>Powered by 100% Local <b>Qwen 2.5-Coder:3B</b> • Privacy Guaranteed • In-Memory DuckDB</span>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Right Drawer: Under the Hood Model Radar & Real-Time Inspector -->
+      <aside class="model-drawer" id="modelDrawer">
+        
+        <!-- Drawer Header -->
+        <div class="drawer-header">
+          <div class="drawer-header-left">
+            <span class="drawer-kicker">REAL-TIME TELEMETRY</span>
+            <h3 class="drawer-title">🧠 Model Radar</h3>
+          </div>
+          <span class="radar-badge" id="radarStatusBadge">IDLE</span>
+        </div>
+
+        <!-- Section 1: Local Model & Engine Specs -->
+        <div class="radar-card">
+          <div class="radar-card-title">
+            <span>LOCAL INFERENCE ENGINE</span>
+            <span class="engine-tag">100% PRIVATE</span>
+          </div>
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span class="spec-lbl">Model</span>
+              <span class="spec-val" id="specModel">Qwen 2.5-Coder:3B</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-lbl">Compute</span>
+              <span class="spec-val">Local CPU</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-lbl">SQL Engine</span>
+              <span class="spec-val">DuckDB v1.0</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-lbl">Context</span>
+              <span class="spec-val">2,048 tokens</span>
+            </div>
+          </div>
+
+          <!-- Execution Metrics -->
+          <div class="metrics-row">
+            <div class="metric-block">
+              <span class="metric-val" id="radarLatency">--</span>
+              <span class="metric-lbl">Latency</span>
+            </div>
+            <div class="metric-block">
+              <span class="metric-val" id="radarRetries">0</span>
+              <span class="metric-lbl">Retries</span>
+            </div>
+            <div class="metric-block">
+              <span class="metric-val" id="radarFigures">0</span>
+              <span class="metric-lbl">Charts</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: ReAct Execution Pipeline Stages -->
+        <div class="radar-card">
+          <div class="radar-card-title">
+            <span id="pipelineListTitle">REACT PIPELINE EXECUTION</span>
+            <span class="pipeline-status" id="pipelineStatusText">Ready</span>
+          </div>
+          <div class="pipeline-stepper" id="pipelineStepper">
+            
+            <!-- Step 1 -->
+            <div class="stepper-item" id="step1">
+              <div class="step-indicator">
+                <span class="step-icon">🎯</span>
+              </div>
+              <div class="step-text">
+                <div class="step-header">
+                  <span class="step-label">1. Intent & Schema Mapping</span>
+                  <span class="step-badge" id="badgeStep1">Idle</span>
+                </div>
+                <div class="step-sub" id="subStep1">Table resolution & join path analysis</div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="stepper-item" id="step2">
+              <div class="step-indicator">
+                <span class="step-icon">⚡</span>
+              </div>
+              <div class="step-text">
+                <div class="step-header">
+                  <span class="step-label">2. Python & DuckDB SQL</span>
+                  <span class="step-badge" id="badgeStep2">Idle</span>
+                </div>
+                <div class="step-sub" id="subStep2">Prompting local Qwen 2.5-Coder:3B</div>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="stepper-item" id="step3">
+              <div class="step-indicator">
+                <span class="step-icon">🛡️</span>
+              </div>
+              <div class="step-text">
+                <div class="step-header">
+                  <span class="step-label">3. Sandbox Execution</span>
+                  <span class="step-badge" id="badgeStep3">Idle</span>
+                </div>
+                <div class="step-sub" id="subStep3">Isolated runtime & chart interception</div>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="stepper-item" id="step4">
+              <div class="step-indicator">
+                <span class="step-icon">🔄</span>
+              </div>
+              <div class="step-text">
+                <div class="step-header">
+                  <span class="step-label">4. Quality Audit & Self-Healing</span>
+                  <span class="step-badge" id="badgeStep4">Idle</span>
+                </div>
+                <div class="step-sub" id="subStep4">Output validation & error correction</div>
+              </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="stepper-item" id="step5">
+              <div class="step-indicator">
+                <span class="step-icon">📊</span>
+              </div>
+              <div class="step-text">
+                <div class="step-header">
+                  <span class="step-label">5. Business ROI Synthesis</span>
+                  <span class="step-badge" id="badgeStep5">Idle</span>
+                </div>
+                <div class="step-sub" id="subStep5">Executive findings & recommendations</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Section 3: Live LLM Token Stream -->
+        <div class="radar-card" id="llmStreamCard">
+          <div class="radar-card-title">
+            <span>🔴 LIVE LLM OUTPUT</span>
+            <span class="llm-phase-badge" id="llmPhaseBadge">IDLE</span>
+          </div>
+          <div class="llm-stream-box" id="llmStreamBox">
+            <span class="llm-placeholder">Waiting for LLM call...</span>
+          </div>
+        </div>
+
+        <!-- Section 4: Live Under the Hood Console -->
+        <div class="radar-card console-box">
+          <div class="radar-card-title">
+            <span>LIVE CONSOLE & ENGINE LOGS</span>
+            <button class="btn-clear-logs" id="btnClearLogs" title="Clear console">Clear</button>
+          </div>
+          <div class="console-terminal" id="consoleTerminal">
+            <div class="log-row sys"><span class="log-time">[00:00:00]</span> <span class="log-tag">[INIT]</span> Ready. Ingest a dataset or ask an analytical question.</div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+    <!-- Table Preview Modal -->
+    <div class="modal-overlay" id="tableModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-badge">TABLE PREVIEW</span>
+            <h3 class="modal-title" id="modalTableName">Table Inspector</h3>
+            <span class="modal-meta" id="modalTableMeta">--</span>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-sm btn-outline" id="btnModalExport">📥 Export Clean CSV</button>
+            <button class="modal-close" id="btnModalClose">&times;</button>
+          </div>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <div class="table-responsive" id="modalTableWrapper"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- App Script -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

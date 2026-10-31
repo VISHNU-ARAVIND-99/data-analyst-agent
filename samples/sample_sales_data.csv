@@ -1,0 +1,22 @@
+order_id,date,customer_id,region,product_category,product_name,units_sold,unit_price,discount,profit,customer_segment
+ORD-1001,2024-01-15,CUST-01,North,Electronics,Wireless Mouse,4,29.99,0.05,42.50,Consumer
+ORD-1002,2024-01-18,CUST-02,South,Office Supplies,Ergonomic Chair,2,199.99,0.10,120.00,Corporate
+ORD-1003,2024-01-22,CUST-03,East,Technology,USB-C Hub,5,45.00,0.00,75.20,Small Business
+ORD-1004,2024-01-25,CUST-04,West,Furniture,Standing Desk,1,450.00,0.15,135.00,Corporate
+ORD-1005,2024-02-02,CUST-05,North,Electronics,Mechanical Keyboard,3,89.99,0.00,95.00,Consumer
+ORD-1006,2024-02-05,CUST-06,South,Technology,Monitor 27-inch,2,249.99,0.05,110.00,Corporate
+ORD-1007,2024-02-11,CUST-07,East,Office Supplies,Desk Organizer,8,18.50,0.00,52.40,Consumer
+ORD-1008,2024-02-14,CUST-08,West,Electronics,Bluetooth Headphones,3,79.99,0.10,68.00,Consumer
+ORD-1009,2024-02-20,CUST-09,North,Furniture,Bookshelf,2,120.00,0.00,48.00,Small Business
+ORD-1010,2024-02-28,CUST-10,South,Technology,Webcam 4K,4,95.00,0.10,114.00,Corporate
+ORD-1011,2024-03-03,CUST-11,East,Electronics,External SSD 1TB,3,109.99,0.05,85.00,Small Business
+ORD-1012,2024-03-08,CUST-12,West,Office Supplies,Gel Pens Pack,12,12.99,0.00,45.00,Consumer
+ORD-1013,2024-03-12,CUST-13,North,Furniture,Office Sofa,1,650.00,0.20,180.00,Corporate
+ORD-1014,2024-03-19,CUST-14,South,Technology,Tablet Stand,6,24.99,0.00,45.00,Consumer
+ORD-1015,2024-03-24,CUST-15,East,Electronics,Smart Power Strip,5,34.99,0.05,52.50,Small Business
+ORD-1016,2024-04-02,CUST-16,West,Technology,Noise-Canceling Mic,2,119.99,0.00,60.00,Corporate
+ORD-1017,2024-04-07,CUST-17,North,Office Supplies,Whiteboard,2,75.00,0.10,38.00,Corporate
+ORD-1018,2024-04-14,CUST-18,South,Furniture,Filing Cabinet,1,180.00,0.05,42.00,Small Business
+ORD-1019,2024-04-21,CUST-19,East,Electronics,Portable Speaker,4,59.99,0.15,64.00,Consumer
+ORD-1020,2024-04-28,CUST-20,West,Technology,Docking Station,2,159.99,0.05,88.00,Corporate
+
